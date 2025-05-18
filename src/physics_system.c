@@ -1,6 +1,11 @@
 
 #include "physics_system.h"
 #include "array_list.h"
+#include "box2d/box2d.h"
+#include "box2d/id.h"
+#include "box2d/types.h"
+#include "common_hash.h"
+#include "common_type.h"
 #include "components.h"
 #include "linked_list.h"
 #include "pray_default_components.h"
@@ -10,6 +15,8 @@
 #include "raylib.h"
 #include <bits/pthreadtypes.h>
 
+static b2WorldId worldID;
+
 typedef struct
 {
     Entity *entity;
@@ -18,60 +25,48 @@ typedef struct
     Collider2D *collider;
 } PhysicsObject;
 
-static AList physicsBodyEntities;
+b2WorldId phyiscsGetWorldID()
+{
+    return worldID;
+}
 
 static void gameUpdate()
 {
-    LList objects;
-    prayEntityLookupAll(&objects, C(typeid(PhysicsBody), typeid(Transform2D), typeid(Collider2D)), 3);
-    int count = 0;
+    b2World_Step(worldID, GetFrameTime(), 4);
 
-    if (objects.size > physicsBodyEntities.length)
-    {
-        alistResize(&physicsBodyEntities, objects.size);
-    }
+    LList bodies;
+    prayEntityLookupAll(&bodies, C(typeid(PhysicsBody), typeid(Transform2D)), 2);
 
     LNode *node = nullptr;
-    LListForEach(&objects, node)
+    LListForEach(&bodies, node)
     {
-        auto entity = LListGetEntry(node, Entity);
-        auto physicsBody = getComponent(entity, PhysicsBody);
-        auto transform = getComponent(entity, Transform2D);
-        auto collider = getComponent(entity, Collider2D);
+        Entity *entity = LListGetEntry(node, Entity);
+        PhysicsBody *physicsBody = getComponent(entity, PhysicsBody);
+        Transform2D *transform = getComponent(entity, Transform2D);
 
-        PhysicsObject *object = alistGet(&physicsBodyEntities, count++);
-        object->entity = entity;
-        object->physicsBody = physicsBody;
-        object->transform = transform;
-        object->collider = collider;
+        b2Vec2 position = b2Body_GetWorldPoint(physicsBody->bodyId, (b2Vec2) {0, 0});
+        transform->position.x = position.x;
+        transform->position.y = position.y;
+        b2Rot rotation = b2Body_GetRotation(physicsBody->bodyId);
+        float radians = b2Rot_GetAngle(rotation);
+        transform->rotation = RAD2DEG * radians;
     }
-
-    for (int i = 0; i < count; i++)
-    {
-        PhysicsObject *objA = alistGet(&physicsBodyEntities, i);
-
-        objA->physicsBody->velocity.y += (objA->physicsBody->gravity * GetFrameTime());
-        objA->transform->position.x += objA->physicsBody->velocity.x * GetFrameTime();
-        objA->transform->position.y += objA->physicsBody->velocity.y * GetFrameTime();
-
-        for (int j = 0; j < count; j++)
-        {
-            PhysicsObject *objB = alistGet(&physicsBodyEntities, j);
-
-            // if (CheckCollisionRecs(, Rectangle rec2)) 
-        }
-    }
-
 }
 
 static void start()
 {
-    alistNew(&physicsBodyEntities, 10, sizeof(PhysicsObject));
+    float lengthUnitsPerMeter = 128.0f;
+    b2SetLengthUnitsPerMeter(lengthUnitsPerMeter);
+
+    b2WorldDef worldDef = b2DefaultWorldDef();
+
+    // Realistic gravity is achieved by multiplying gravity by the length unit.
+    worldDef.gravity.y = 9.8f * lengthUnitsPerMeter;
+    worldID = b2CreateWorld(&worldDef);
 }
 
 static void stop()
 {
-    alistFree(&physicsBodyEntities);
 }
 
 void registerPhysicsSystem()

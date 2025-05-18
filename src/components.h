@@ -2,9 +2,11 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
+#include "box2d/math_functions.h"
 #include "common_type.h"
 #include "raylib.h"
 #include <sys/types.h>
+#include <box2d/box2d.h>
 
 
 typedef struct
@@ -46,8 +48,7 @@ DECLARE_TYPE(Shape2D);
 
 typedef struct
 {
-    Vector2 velocity;
-    float gravity;
+    b2BodyId bodyId;
     float mass;
 } PhysicsBody;
 
