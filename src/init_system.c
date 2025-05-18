@@ -1,5 +1,6 @@
 
 #include "init_system.h"
+#include "common_type.h"
 #include "components.h"
 #include "pray_default_components.h"
 #include "pray_entity.h"
@@ -10,11 +11,12 @@
 
 static void start()
 {
-    cid cids[] = {
-        CID(PhysicsBody),
-        CID(Shape2D),
-        CID(Transform2D),
-        CID(Collider2D)};
+    type_id cids[] = {
+        typeid(PhysicsBody),
+        typeid(Shape2D),
+        typeid(Transform2D),
+        typeid(Collider2D),
+    };
 
     Entity *entity = prayEntityNew(cids, 4);
     Shape2D *shape2D = getComponent(entity, Shape2D);

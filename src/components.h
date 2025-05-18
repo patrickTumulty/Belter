@@ -2,21 +2,17 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#include "pray_component.h"
-#include "pray_default_components.h"
+#include "common_type.h"
 #include "raylib.h"
+#include <sys/types.h>
 
-#ifdef COMPONENT_OFFSET
-#undef COMPONENT_OFFSET
-#endif
-#define COMPONENT_OFFSET COMPONENT_BANK_A
 
 typedef struct
 {
     float velocity;
 } Player;
 
-REGISTER_CID(Player);
+DECLARE_TYPE(Player);
 
 typedef enum : u8
 {
@@ -46,7 +42,7 @@ typedef struct
     Color color;
 } Shape2D;
 
-REGISTER_CID(Shape2D);
+DECLARE_TYPE(Shape2D);
 
 typedef struct
 {
@@ -55,7 +51,7 @@ typedef struct
     float mass;
 } PhysicsBody;
 
-REGISTER_CID(PhysicsBody);
+DECLARE_TYPE(PhysicsBody);
 
 typedef struct
 {
@@ -66,7 +62,7 @@ typedef struct
     };
 } Collider2D;
 
-REGISTER_CID(Collider2D);
+DECLARE_TYPE(Collider2D);
 
 void registerComponents();
 

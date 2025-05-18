@@ -13,7 +13,7 @@
 static void renderUpdate()
 {
     LList shapes;
-    prayEntityLookupAll(&shapes, C(CID(Shape2D)), 1);
+    prayEntityLookupAll(&shapes, C(typeid(Shape2D)), 1);
 
     LNode *node = nullptr;
     LListForEach(&shapes, node)
