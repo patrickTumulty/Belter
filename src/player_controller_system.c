@@ -97,6 +97,18 @@ static void gameUpdate()
         // b2Body_SetLinearVelocity(physicsBody->bodyId, velocity);
 
         b2Body_ApplyForceToCenter(physicsBody->bodyId, force, true);
+
+        float maxSpeed = 200.0f;
+        b2Vec2 velocity = b2Body_GetLinearVelocity(physicsBody->bodyId);
+
+        float speed = b2Length(velocity);
+        if (speed > maxSpeed)
+        {
+            float scale = maxSpeed / speed;
+            velocity.x *= scale;
+            velocity.y *= scale;
+            b2Body_SetLinearVelocity(physicsBody->bodyId, velocity);
+        }
     }
 }
 
