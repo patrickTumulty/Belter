@@ -2,6 +2,7 @@
 #include "physics_system.h"
 #include "array_list.h"
 #include "box2d/box2d.h"
+#include "box2d/collision.h"
 #include "box2d/id.h"
 #include "box2d/types.h"
 #include "common_hash.h"
@@ -17,18 +18,32 @@
 
 static b2WorldId worldID;
 
-typedef struct
-{
-    Entity *entity;
-    Transform2D *transform;
-    PhysicsBody *physicsBody;
-    Collider2D *collider;
-} PhysicsObject;
-
 b2WorldId phyiscsGetWorldID()
 {
     return worldID;
 }
+
+void physicsBodyCreateBox(PhysicsBody *physicsBody,
+                          Vector2 position,
+                          float width,
+                          float height,
+                          b2BodyType bodyType, 
+                          bool fixedRotation)
+{
+    b2BodyDef bodyDef = b2DefaultBodyDef();
+    bodyDef.position = (b2Vec2) {
+        .x = position.x,
+        .y = position.y,
+    };
+    bodyDef.type = bodyType;
+    bodyDef.fixedRotation = fixedRotation;
+    physicsBody->bodyId = b2CreateBody(phyiscsGetWorldID(), &bodyDef);
+    b2ShapeDef shapeDef = b2DefaultShapeDef();
+    shapeDef.density = 1.0f / 40.0f;
+    b2Polygon boxPolygon = b2MakeBox(width * 0.5f, height * 0.5f);
+    b2CreatePolygonShape(physicsBody->bodyId, &shapeDef, &boxPolygon);
+}
+
 
 static void gameUpdate()
 {
@@ -55,7 +70,7 @@ static void gameUpdate()
 
 static void start()
 {
-    float lengthUnitsPerMeter = 128.0f;
+    float lengthUnitsPerMeter = 20.0f;
     b2SetLengthUnitsPerMeter(lengthUnitsPerMeter);
 
     b2WorldDef worldDef = b2DefaultWorldDef();
@@ -67,6 +82,22 @@ static void start()
 
 static void stop()
 {
+    b2DestroyWorld(worldID);
+}
+
+static void renderUpdate()
+{
+    // LList bodies;
+    // prayEntityLookupAll(&bodies, C(typeid(PhysicsBody)), 1);
+    //
+    // LNode *node = nullptr;
+    // LListForEach(&bodies, node)
+    // {
+    //     Entity *entity = LListGetEntry(node, Entity);
+    //     PhysicsBody *physicsBody = getComponent(entity, PhysicsBody);
+    //     b2Vec2 position = b2Body_GetWorldPoint(physicsBody->bodyId, (b2Vec2) {0, 0});
+    //     DrawCircle((int) position.x, (int) position.y, 10, BLUE);
+    // }
 }
 
 void registerPhysicsSystem()
@@ -76,6 +107,7 @@ void registerPhysicsSystem()
         .start = start,
         .stop = stop,
         .gameUpdate = gameUpdate,
+        .renderUpdateWorldSpace = renderUpdate,
     };
     praySystemsRegister(system);
 }

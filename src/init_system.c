@@ -13,8 +13,7 @@
 #include "pray_system.h"
 #include "raylib.h"
 
-
-static void start()
+static void createGround()
 {
     type_id cids[] = {
         typeid(PhysicsBody),
@@ -23,7 +22,47 @@ static void start()
         typeid(Collider2D),
     };
 
-    Entity *entity = prayEntityNew(cids, 4);
+    u32 cidsLen = sizeof(cids) / sizeof(type_id);
+
+    Entity *entity = prayEntityNew(cids, cidsLen);
+    auto transform = getComponent(entity, Transform2D);
+    transform->position.y = 100;
+    transform->position.x = 0;
+    auto shape2D = getComponent(entity, Shape2D);
+    shape2D->color = RAYWHITE;
+    shape2D->shape = SHAPE_RECTANGLE;
+    shape2D->rectangle.height = 40;
+    shape2D->rectangle.width = 2000;
+    auto physicsBody = getComponent(entity, PhysicsBody);
+
+    physicsBodyCreateBox(physicsBody,
+                         transform->position,
+                         shape2D->rectangle.width,
+                         shape2D->rectangle.height,
+                         b2_staticBody, 
+                         true);
+
+    auto collider = getComponent(entity, Collider2D);
+    collider->shape = SHAPE_RECTANGLE;
+    collider->rectangle.height = 40;
+    collider->rectangle.width = 2000;
+    prayEntityRegister(entity);
+}
+
+static void start()
+{
+    type_id cids[] = {
+        typeid(Player),
+        typeid(PhysicsBody),
+        typeid(Shape2D),
+        typeid(Transform2D),
+        typeid(Collider2D),
+        typeid(CameraFocus),
+    };
+
+    u32 cidsLen = sizeof(cids) / sizeof(type_id);
+
+    Entity *entity = prayEntityNew(cids, cidsLen);
 
     Transform2D *transform = getComponent(entity, Transform2D);
     transform->position.y = 0;
@@ -37,17 +76,12 @@ static void start()
 
     PhysicsBody *physicsBody = getComponent(entity, PhysicsBody);
 
-    b2BodyDef bodyDef = b2DefaultBodyDef();
-    bodyDef.position = (b2Vec2) {
-        .x = transform->position.x,
-        .y = transform->position.y,
-    };
-    bodyDef.type = b2_dynamicBody;
-    physicsBody->bodyId = b2CreateBody(phyiscsGetWorldID(), &bodyDef);
-    b2ShapeDef shapeDef = b2DefaultShapeDef();
-    b2Polygon boxPolygon = b2MakeBox(shape2D->rectangle.width * 0.5f,
-                                     shape2D->rectangle.height * 0.5f);
-    b2CreatePolygonShape(physicsBody->bodyId, &shapeDef, &boxPolygon);
+    physicsBodyCreateBox(physicsBody,
+                         transform->position,
+                         shape2D->rectangle.width,
+                         shape2D->rectangle.height,
+                         b2_dynamicBody,
+                         true);
 
     Collider2D *collider = getComponent(entity, Collider2D);
     collider->shape = SHAPE_RECTANGLE;
@@ -55,36 +89,9 @@ static void start()
     collider->rectangle.width = 20;
     prayEntityRegister(entity);
 
-    // Ground
-    entity = prayEntityNew(cids, 4);
-    transform = getComponent(entity, Transform2D);
-    transform->position.y = 100;
-    transform->position.x = 100;
-    shape2D = getComponent(entity, Shape2D);
-    shape2D->color = BLACK;
-    shape2D->shape = SHAPE_RECTANGLE;
-    shape2D->rectangle.height = 40;
-    shape2D->rectangle.width = 2000;
-    physicsBody = getComponent(entity, PhysicsBody);
-
-    bodyDef = b2DefaultBodyDef();
-    bodyDef.position = (b2Vec2) {
-        .x = transform->position.x,
-        .y = transform->position.y,
-    };
-    bodyDef.type = b2_staticBody;
-    physicsBody->bodyId = b2CreateBody(phyiscsGetWorldID(), &bodyDef);
-    shapeDef = b2DefaultShapeDef();
-    boxPolygon = b2MakeBox(shape2D->rectangle.width * 0.5f,
-                           shape2D->rectangle.height * 0.5f);
-    b2CreatePolygonShape(physicsBody->bodyId, &shapeDef, &boxPolygon);
-
-    collider = getComponent(entity, Collider2D);
-    collider->shape = SHAPE_RECTANGLE;
-    collider->rectangle.height = 40;
-    collider->rectangle.width = 2000;
-    prayEntityRegister(entity);
+    createGround();
 }
+
 
 static void stop()
 {

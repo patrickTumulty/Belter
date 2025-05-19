@@ -11,7 +11,6 @@
 
 typedef struct
 {
-    float velocity;
 } Player;
 
 DECLARE_TYPE(Player);
@@ -64,6 +63,11 @@ typedef struct
 } Collider2D;
 
 DECLARE_TYPE(Collider2D);
+
+typedef struct {
+} CameraFocus;
+
+DECLARE_TYPE(CameraFocus);
 
 void registerComponents();
 

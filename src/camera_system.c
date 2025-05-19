@@ -1,27 +1,31 @@
 
 #include "camera_system.h"
+#include "common_hash.h"
+#include "common_type.h"
+#include "components.h"
 #include "pray_camera.h"
+#include "pray_default_components.h"
+#include "pray_entity.h"
+#include "pray_entity_registry.h"
 #include "pray_system.h"
 #include "raylib.h"
+#include <stdio.h>
 
-static float cameraSpeed = 1600.0f;
 static Vector2 cameraTarget;
 static const float SCREEN_HEIGHT = 500.0f;
 static const float SCREEN_WIDTH = 500.0f;
-
 
 Vector2 getScreenCenter()
 {
     return (Vector2) {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
 }
 
-
 void start()
 {
     Camera2D *camera = prayGetCamera();
 
     cameraTarget = getScreenCenter();
-    camera->target = cameraTarget;
+    camera->target = (Vector2) {0, 0};
     camera->offset = (Vector2) {0, 0};
     camera->rotation = 0.0f;
     camera->zoom = 3.0f;
@@ -31,38 +35,52 @@ void close()
 {
 }
 
+
 void gameUpdate()
 {
     Camera2D *camera = prayGetCamera();
 
-    cameraTarget.x -= (float) IsKeyDown(KEY_A) * (1.0f * GetFrameTime() * cameraSpeed);
-    cameraTarget.x += (float) IsKeyDown(KEY_D) * (1.0f * GetFrameTime() * cameraSpeed);
-    cameraTarget.y -= (float) IsKeyDown(KEY_W) * (1.0f * GetFrameTime() * cameraSpeed);
-    cameraTarget.y += (float) IsKeyDown(KEY_S) * (1.0f * GetFrameTime() * cameraSpeed);
-
-    float wheel = GetMouseWheelMove();
-    if (wheel != 0)
+    Entity *entity = prayEntityLookup(C(typeid(CameraFocus), typeid(Transform2D)), 2);
+    if (entity == nullptr)
     {
-        const float zoomIncrement = 0.25f;
-        camera->zoom += (wheel * zoomIncrement);
-        if (camera->zoom < 0.1f)
-        {
-            camera->zoom = 0.1f;
-        }
-
-        if (camera->zoom > 8.0f)
-        {
-            camera->zoom = 8.0f;
-        }
+        return;
     }
-
-    camera->target = cameraTarget;
 
     float width = (float) GetScreenWidth();
     float height = (float) GetScreenHeight();
-    camera->offset = (Vector2) {width / 2, height / 2};
-}
 
+    float marginX = width * 0.25f;
+    float marginY = height * 0.25f;
+
+    Transform2D *transform = getComponent(entity, Transform2D);
+
+    Vector2 focusPosition = GetWorldToScreen2D(transform->position, *camera);
+
+    float speed = 1.8f;
+
+    if (focusPosition.x < marginX)
+    {
+        camera->target.x -= speed;
+    }
+    else if (focusPosition.x > (width - marginX))
+    {
+        camera->target.x += speed;
+    }
+
+    if (focusPosition.y < marginY)
+    {
+        camera->target.y -= speed;
+    }
+    else if (focusPosition.y > (height - marginY))
+    {
+        camera->target.y += speed;
+    }
+
+    camera->offset = (Vector2) {
+        width * 0.5f,
+        (height * 0.5f) + 600,
+    };
+}
 
 void registerCameraSystem()
 {

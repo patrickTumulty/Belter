@@ -37,13 +37,15 @@ static void renderUpdate()
                            shape2D->color);
                 break;
             case SHAPE_RECTANGLE:
+                float halfWidth = shape2D->rectangle.width * 0.5f;
+                float halfHeight = shape2D->rectangle.height * 0.5f;
                 Rectangle rectangle = {
-                    .x = position.x - (shape2D->rectangle.width / 2),
-                    .y = position.y - (shape2D->rectangle.height / 2),
+                    .x = position.x,
+                    .y = position.y,
                     .width = shape2D->rectangle.width,
                     .height = shape2D->rectangle.height,
                 };
-                DrawRectanglePro(rectangle, (Vector2) {0, 0}, rotation, shape2D->color);
+                DrawRectanglePro(rectangle, (Vector2) {halfWidth, halfHeight}, rotation, shape2D->color);
                 break;
         }
     }

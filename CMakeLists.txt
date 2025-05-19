@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(runtime VERSION 0.1.0 LANGUAGES C)
+project(belter VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED True) # Optional, but recommended
@@ -27,9 +27,27 @@ file(GLOB SOURCES
     src/camera_system.c
     src/physics_system.c
     src/components.c
+    src/player_controller_system.c
+    src/background_system.c
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/dist/bin"
+)
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/runtime/gamecontrollerdb.txt 
+    ${CMAKE_BINARY_DIR}/dist/runtime/gamecontrollerdb.txt 
+    COPYONLY
+)
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/scripts/start.sh
+    ${CMAKE_BINARY_DIR}/dist/start.sh
+    COPYONLY
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE prayengine)
 

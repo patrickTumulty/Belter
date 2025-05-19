@@ -8,6 +8,7 @@ DEFINE_TYPE(Player);
 DEFINE_TYPE(Shape2D);
 DEFINE_TYPE(PhysicsBody);
 DEFINE_TYPE(Collider2D);
+DEFINE_TYPE(CameraFocus);
 
 void registerComponents()
 {
@@ -24,4 +25,7 @@ void registerComponents()
 
     REGISTER_TYPE(Collider2D);
     registerComponent(Collider2D, nullptr, nullptr);
+
+    REGISTER_TYPE(CameraFocus);
+    registerComponent(CameraFocus, nullptr, nullptr);
 }
