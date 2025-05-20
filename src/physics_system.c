@@ -15,6 +15,7 @@
 #include "pray_system.h"
 #include "raylib.h"
 #include <bits/pthreadtypes.h>
+#include <stdio.h>
 
 static b2WorldId worldID;
 
@@ -82,7 +83,8 @@ static void start()
 
 static void stop()
 {
-    b2DestroyWorld(worldID);
+    printf("NEED TO FREE WORLD AFTER ALL THE BODIES\n");
+    // b2DestroyWorld(worldID);
 }
 
 static void renderUpdate()

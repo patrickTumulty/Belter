@@ -8,6 +8,7 @@
 #include "pray_entity.h"
 #include "pray_entity_registry.h"
 #include "pray_system.h"
+#include "pray_utils.h"
 #include "raylib.h"
 #include "tmem.h"
 #include <stdio.h>
@@ -25,6 +26,7 @@ static void gameUpdate()
 {
     Entity *entity = prayEntityLookup(C(typeid(Player)), 1);
 
+    Player *player = getComponent(entity, Player);
     PhysicsBody *physicsBody = getComponent(entity, PhysicsBody);
     Transform2D *transform = getComponent(entity, Transform2D);
 
@@ -109,6 +111,12 @@ static void gameUpdate()
             velocity.y *= scale;
             b2Body_SetLinearVelocity(physicsBody->bodyId, velocity);
         }
+
+        Vector2 rightStick = {
+            .x = rightStickX * -1,
+            .y = rightStickY * -1,
+        };
+        player->aimAngle = prayCalcAngle(VEC2_ZERO, rightStick);
     }
 }
 
@@ -137,12 +145,23 @@ static void start()
     fclose(f);
 }
 
+static void renderUpdate()
+{
+    Entity *entity = prayEntityLookup(C(typeid(Player)), 1);
+    Transform2D *transform = getComponent(entity, Transform2D);
+    Player *player = getComponent(entity, Player);
+
+    Vector2 aimPoint = prayCalcPointOnCircle(transform->position, player->aimAngle * DEG2RAD, 20);
+    DrawCircle((int) aimPoint.x, (int) aimPoint.y, 5, GREEN);
+}
+
 void registerPlayerControllerSystem()
 {
     System system = {
         .name = "Player Controller",
         .start = start,
         .gameUpdate = gameUpdate,
+        .renderUpdateWorldSpace = renderUpdate,
     };
     praySystemsRegister(system);
 }

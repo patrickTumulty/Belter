@@ -11,6 +11,7 @@
 
 typedef struct
 {
+    float aimAngle;
 } Player;
 
 DECLARE_TYPE(Player);
@@ -48,10 +49,14 @@ DECLARE_TYPE(Shape2D);
 typedef struct
 {
     b2BodyId bodyId;
-    float mass;
 } PhysicsBody;
 
 DECLARE_TYPE(PhysicsBody);
+
+typedef struct {
+} Asteroid;
+
+DECLARE_TYPE(Asteroid);
 
 typedef struct
 {
